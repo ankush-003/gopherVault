@@ -3,8 +3,9 @@ package filebased
 import (
 	"fmt"
 	"os"
-
 	"github.com/gopherVault/db"
+	"math/rand"
+	"strconv"
 )
 
 type FileBasedDB struct {
@@ -35,4 +36,37 @@ func (db *FileBasedDB) SaveToFile(data []byte) error {
 
 	// flush the data to the file
 	return fp.Sync()
+}
+
+func (db *FileBasedDB) SaveToFileAtomic(data []byte) error {
+	// os.O_EXCL -> if the file already exists, return an error
+
+	tmp := fmt.Sprintf("%s.%s.tmp", db.config.Path, randomString())
+	fp, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer func() {
+		fp.Close()
+		if err != nil {
+			os.Remove(tmp) // remove the file if there is an error
+		}
+	}()
+
+	_, err = fp.Write(data)
+	if err != nil {
+		return fmt.Errorf("failed to write data to file: %v", err)
+	}
+
+	if err := fp.Sync(); err != nil {
+		return fmt.Errorf("failed to sync file: %v", err)
+	}
+
+	err = os.Rename(tmp, db.config.Path)
+	return nil
+}
+
+func randomString() string {
+	num := rand.Intn(100000)
+	return strconv.Itoa(num)
 }

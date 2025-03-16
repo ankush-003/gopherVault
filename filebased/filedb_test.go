@@ -35,3 +35,19 @@ func TestParalledSimpleSave(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+
+func TestParalledAtomicSave(t *testing.T) {
+	fileBasedDB := NewFileBasedDB(dbConfig)
+
+	wg := sync.WaitGroup{}
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		go func() {
+			defer wg.Done()
+			// test that this should fail
+			fileBasedDB.SaveToFileAtomic([]byte("Hello, World by writer " + strconv.Itoa(i)))
+		}()
+	}
+	wg.Wait()
+}

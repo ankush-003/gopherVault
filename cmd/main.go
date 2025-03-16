@@ -12,6 +12,11 @@ func main() {
 	fileBasedDB := filebased.NewFileBasedDB(dbConfig)
 
 	err := fileBasedDB.SaveToFile([]byte("Hello, World! testing 2"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = fileBasedDB.SaveToFileAtomic([]byte("Hello, World! testing 3"))
 
 	if err != nil {
 		log.Fatal(err)
