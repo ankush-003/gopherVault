@@ -1,2 +1,6 @@
 // ignore data files
 *.db
+
+// ide files
+.vscode
+.idx
