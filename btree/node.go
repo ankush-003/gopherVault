@@ -85,7 +85,7 @@ func (node BNode) getOffset(idx uint16) uint16 {
 	if idx == 0 {
 		return 0
 	}
-	if idx >= node.nkeys() {
+	if idx > node.nkeys() {
 		panic("index out of range")
 	}
 	pos := 4 + 8*node.nkeys() + (idx-1)*2
@@ -93,7 +93,7 @@ func (node BNode) getOffset(idx uint16) uint16 {
 }
 
 func (node BNode) setOffset(idx uint16, offset uint16) {
-	if idx >= node.nkeys() {
+	if idx > node.nkeys() {
 		panic("index out of range")
 	}
 
@@ -102,7 +102,7 @@ func (node BNode) setOffset(idx uint16, offset uint16) {
 }
 
 func (node BNode) kvPos(idx uint16) uint16 {
-	if idx >= node.nkeys() {
+	if idx > node.nkeys() {
 		panic("index out of range")
 	}
 	pos := 4 + 8*node.nkeys() + 2*(node.nkeys()) + node.getOffset(idx)
@@ -126,6 +126,10 @@ func (node BNode) getVal(idx uint16) []byte {
 	keysize := binary.LittleEndian.Uint16(node[pos+0:])
 	valSize := binary.LittleEndian.Uint16(node[pos+2:])
 	return node[pos+4+keysize:][:valSize]
+}
+
+func (node BNode) nbytes() uint16 {
+	return node.getOffset(node.nkeys()) // offset of last key (0index at 1, 1index at n)
 }
 
 func appendKV(node BNode, idx uint16, ptr uint64, key, val []byte) {

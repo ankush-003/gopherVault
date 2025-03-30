@@ -13,10 +13,10 @@ func TestSize(t *testing.T) {
 }
 
 func TestNewBNode(t *testing.T) {
-	node := NewBNode(WithHeader(BNODE_LEAF, 5))
+	node := NewBNode(WithHeader(BNODE_LEAF, 2))
 
 	k1, v1 := []byte("k1"), []byte("hi")
-	k2, v2 := []byte("k2"), []byte("hello")
+	k2, v2 := []byte("k2"), []byte(`{"name":"joe"}`)
 
 	appendKV(node, 0, 0, k1, v1)
 	appendKV(node, 1, 0, k2, v2)
@@ -25,6 +25,7 @@ func TestNewBNode(t *testing.T) {
 
 	t.Log("k1:", k1, "v1:", v1)
 	t.Log("k2:", k2, "v2:", v2)
+	t.Log("node size:", node.nbytes())
 
 	assert.Equal(t, k1, node.getKey(0))
 	assert.Equal(t, v1, node.getVal(0))
