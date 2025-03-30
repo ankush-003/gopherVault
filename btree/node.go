@@ -132,6 +132,7 @@ func (node BNode) nbytes() uint16 {
 	return node.getOffset(node.nkeys()) // offset of last key (0index at 1, 1index at n)
 }
 
+// appends a key-value pair to the node at the given index
 func appendKV(node BNode, idx uint16, ptr uint64, key, val []byte) {
 	if idx >= node.nkeys() {
 		panic("index out of range")
@@ -148,4 +149,13 @@ func appendKV(node BNode, idx uint16, ptr uint64, key, val []byte) {
 	copy(node[pos+4+keySize:], val)
 
 	node.setOffset(idx+1, node.getOffset(idx)+4+keySize+valSize)
+}
+
+// appends n key-value pairs from old to new, n is the number of key-value pairs to append
+func appendRange(new, old BNode, dst, src, n uint16) {
+	for i := uint16(0); i < n; i++ {
+		appendKV(new, dst+i,
+			old.getPtr(src+i), old.getKey(src+i), old.getVal(src+i),
+		)
+	}
 }
